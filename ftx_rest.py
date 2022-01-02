@@ -1,3 +1,4 @@
+import json
 import time
 import datetime
 import hashlib
@@ -110,19 +111,21 @@ _FUNDING_PAYMENTS = "/funding_payments"
 _STAKING = "/staking/stakes"
 _UNSTAKE = "/staking/unstake_requests"
 _STAKE_BALANCE = "/staking/balances"
+_CANCEL_UNSTAKE = "/staking/unstake_requests/{request_id}"
 _STAKING_REWARDS = "/staking/staking_rewards"
 _STAKE_REQUEST = "/srm_stakes/stakes"
 
 """ SPOT MARGIN """
-_POST_MARGIN = "/spot_margin/history"
+_SPOT_MARGIN_HISTORY = "/spot_margin/history"
 _BORROW_RATES = "/spot_margin/borrow_rates"
 _LENDING_RATES = "/spot_margin/lending_rates"
 _DAILY_BORROWED_SUMMARY = "/spot_margin/borrow_summary"
 _SPOT_MARKET_INFO = "/spot_margin/market_info"
-_BORROW_HISTORY = "/spot_margin/borrow_history"
-_LENDING_HISTORY = "/spot_margin/lending_history"
+_MY_BORROW_HISTORY = "/spot_margin/borrow_history"
+_MY_LENDING_HISTORY = "/spot_margin/lending_history"
 _LENDING_OFFERS = "/spot_margin/offers" # SAME FOR SUBMITTING OFFER
 _LENDING_INFO = "/spot_margin/lending_info"
+
 
 api_limit_track_post = []
 api_limit_track_get = []
@@ -460,4 +463,97 @@ def cancel_all_orders(**params):
     return private_request("DELETE", _ORDERS, json=params)
 
 
+def fills(**params):
+    '''
+    market	string	BTC-0329	optional; market to limit fills
+    start_time	number	1564146934	optional; minimum time of fills to return, in Unix time (seconds since 1970-01-01)
+    end_time	number	1564233334	optional; maximum time of fills to return, in Unix time (seconds since 1970-01-01)
+    order	string	null	optional; default is descending, supply 'asc' to receive fills in ascending order of time
+    orderId	number	null	
+    '''
+    return private_request("GET", _FILLS, params=params)
+
+def funding_payment(**params):
+    '''
+    start_time	number	1559881511	optional
+    end_time	number	1559881711	optional
+    future	string	BTC-PERP	optional
+    '''
+    return private_request("GET", _FUNDING_PAYMENTS, params=params)
+
+""" Staking API"""
+def stakes(**params):
+    return private_request("GET", _STAKING, params=params)
+
+def unstake_request(**params):
+    '''
+        coin	string	SRM
+        size	number	0.1
+    '''
+    return private_request("GET", _UNSTAKE, params=params)
+
+def stake_balance(**params):
+    return private_request("GET", _STAKE_BALANCE, params=params)
+
+def cancel_unstake_request(request_id):
+    return private_request("DELETE", _CANCEL_UNSTAKE, url_params={"request_id": request_id})
+
+def stake_rewards(**params):
+    return private_request('GET', _STAKING_REWARDS, params=params)
+
+def stake_request(**params):
+    '''
+    coin	string	SRM
+    size	number	0.1
+    '''
+    return private_request("POST", _STAKE_REQUEST, json=params)
+
+""" Margin API """
+
+def lending_history(**params):
+    '''
+    start_time	number	1559881511	optional; only fetch history after this time
+    end_time	number	1559901511	optional; only fetch history before this time
+    '''
+    return private_request("GET", _SPOT_MARGIN_HISTORY, params=params)
+
+def borrow_rates(**params):
+    return private_request("GET", _BORROW_RATES, params=params)
+
+def lending_rates(**params):
+    return private_request("GET", _LENDING_RATES, params=params)
+
+def daily_borrow_summary(**params):
+    return private_request("GET", _DAILY_BORROWED_SUMMARY, params=params)
+
+def market_info(**params):
+    return private_request("GET", _SPOT_MARKET_INFO, params=params)
+
+def my_borrow_history(**params):
+    '''
+    start_time	number	1559881511	optional; only fetch history after this time
+    end_time	number	1559901511	optional; only fetch history before this time
+    '''
+    return private_request("GET", _MY_BORROW_HISTORY, params=params)
+
+def my_lending_history(**params):
+    '''
+    start_time	number	1559881511	optional; only fetch history after this time
+    end_time	number	1559901511	optional; only fetch history before this time
+    '''
+    return private_request("GET", _MY_LENDING_HISTORY, params=params)
+
+def lending_offers(**params):
+    return private_request("GET", _LENDING_OFFERS, params=params)
+
+def lending_info(**params):
+    return private_request("GET", _LENDING_INFO, params=params)
+
+def submit_lending_offer(**params):
+    '''
+    coin	string	USD	
+    size	number	10.0	
+    rate	number	1e-6	
+    '''
+    return private_request("POST", _LENDING_OFFERS, json=params)
     
