@@ -561,3 +561,118 @@ def submit_lending_offer(**params):
     '''
     return private_request("POST", _LENDING_OFFERS, json=params)
     
+# Custom functions
+def maker_order(**params):
+	params.update(type='LIMIT')
+	return place_order(**params)
+
+
+def maker_buy(market, price, size):
+	params = locals()
+	params.update(side='buy')
+	return maker_order(**params)
+
+
+def maker_sell(market, price, size):
+	params = locals()
+	params.update(side='sell')
+	return maker_order(**params)
+
+
+def all_open_orders(**params):
+	return open_orders(**params)
+
+
+def open_orders_by_symbol(market, **params):
+	params.update(market=market)
+	return open_orders(**params)
+
+""" Not supported """
+# def open_orders_by_id(orderid, **params):
+# 	params.update(orderId=orderid)
+# 	return open_orders(**params)
+
+
+def create_ts():
+	return str(round(pd.Timestamp.utcnow().timestamp() * 1000))
+
+""" Previously named balances"""
+def custom_balances():
+	coins_resp = balances()
+	#coins = {coin['coin']: {'free': coin['free'], 'total': coin['total'], 'locked': coin['locked']}for coin in coins['result']['balances']}
+	coins = {'last_update': create_ts()}
+	for line in coins_resp['result']['balances']:
+		sym = line['coin']
+		coins[f'{sym}_free'] = line['free']
+		coins[f'{sym}_locked'] = line['locked']
+
+	return coins
+
+
+def pair_info():
+	'''
+	RETURNS 
+	{'name': 'BTCUSDT',
+	'alias': 'BTCUSDT',
+	'baseCurrency': 'BTC',
+	'quoteCurrency': 'USDT',
+	'basePrecision': '0.000001',
+	'quotePrecision': '0.00000001',
+	'minTradeQuantity': '0.000158',
+	'minTradeAmount': '10',
+	'maxTradeQuantity': '4',
+	'maxTradeAmount': '100000',
+	'minPricePrecision': '0.01',
+	'category': 1,
+	'showStatus': True}
+	'''
+
+
+
+	resp = symbols()
+	info = {}
+	for ticker in resp['result']:
+		info[ticker['name']] = ticker
+	return info
+
+""" An API exists already for below functionality"""
+# def cancel_all_orders():
+# 	orders = all_open_orders()
+# 	try:
+# 		order_ids = [line['id'] for line in orders['result']]
+# 		if order_ids:
+# 			cancel_by_id(','.join(order_ids))
+# 	except Exception as e:
+# 		print(e)
+
+
+def check_api_limit():
+	global api_limit_track_post
+	global api_limit_track_get
+
+	two_min_ago = pd.Timestamp.utcnow() - pd.Timedelta(minutes=2)
+	api_limit_track_post = [i for i in api_limit_track_post if i > two_min_ago]
+	api_limit_track_get = [i for i in api_limit_track_get if i > two_min_ago]
+
+	post_len = len(api_limit_track_post)
+	get_len = len(api_limit_track_get)
+
+	return [get_len, post_len]
+
+def check_micro_api_limit():
+	global api_limit_track_post
+	global api_limit_track_get
+
+	one_secs_ago = pd.Timestamp.utcnow() - pd.Timedelta(seconds=1)
+
+	post_len = len([i for i in api_limit_track_post if i > one_secs_ago])
+	get_len = len([i for i in api_limit_track_get if i > one_secs_ago])
+
+	return [get_len, post_len]
+
+
+
+def ticker_list():
+	sym = symbols()
+	return [i['name'] for i in sym['result']]
+
