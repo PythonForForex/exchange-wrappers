@@ -389,7 +389,7 @@ def place_trigger_order(**params):
     retryUntilFilled	boolean	false	Whether or not to keep re-triggering until filled. optional, default true for market orders
     
     Additional parameters for stop loss orders
-    riggerPrice	number	0.306525	
+    triggerPrice	number	0.306525	
     orderPrice	number	0.3063	optional; order type is limit if this is specified; otherwise market
 
     Additional parameters for trailing stop orders
@@ -482,7 +482,7 @@ def funding_payment(**params):
     return private_request("GET", _FUNDING_PAYMENTS, params=params)
 
 """ Staking API"""
-def stakes(**params):
+def get_stakes(**params):
     return private_request("GET", _STAKING, params=params)
 
 def unstake_request(**params):
@@ -490,7 +490,7 @@ def unstake_request(**params):
         coin	string	SRM
         size	number	0.1
     '''
-    return private_request("GET", _UNSTAKE, params=params)
+    return private_request("POST", _UNSTAKE, json=params)
 
 def stake_balance(**params):
     return private_request("GET", _STAKE_BALANCE, params=params)
@@ -526,7 +526,11 @@ def lending_rates(**params):
 def daily_borrow_summary(**params):
     return private_request("GET", _DAILY_BORROWED_SUMMARY, params=params)
 
-def market_info(**params):
+def spot_market_info(**params):
+    '''
+        market  string  BTC market ie. BTC/USD
+    NOTE: Will return None if spot margin is not enabled in account settings.
+    '''
     return private_request("GET", _SPOT_MARKET_INFO, params=params)
 
 def my_borrow_history(**params):
